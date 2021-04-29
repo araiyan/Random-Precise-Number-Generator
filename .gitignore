@@ -1,0 +1,19 @@
+
+*.ilk
+*.pdb
+*.sln
+Random Number Generator With Decimals/.vs/Random Number Generator With Decimals/v16/.suo
+*.db
+*.ipch
+*.tlog
+*.recipe
+*.log
+*.obj
+*.idb
+generatedNumbers.txt
+*.vcxproj
+*.filters
+*.user
+Debug/Random Number Generator With Decimals.exe
+*.iobj
+*.ipdb
