@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <time.h>
 #include <cmath>
+#include <string>
 
 struct NumberGenerateInfo
 {
@@ -11,32 +12,28 @@ struct NumberGenerateInfo
     int precision;
 };
 
+void getNumbersInfo(NumberGenerateInfo& info, int& numbersToGenerate,
+    int& numberOnEachRow);
+int getInput(std::string prompt, bool canBeNegative);
 double getRandomNumber(NumberGenerateInfo info);
 
 int main()
 {
-    // Change this value to generate a specified amount of numbers
-    const int NUMBERS_TO_GENERATE = 100;
-    // Change this value to handle how many numbers are on each row
-    const int NUMBERS_ON_ROW = 10;
-
     std::ofstream outputFile;
     NumberGenerateInfo info;
 
-    // Define all the bounds and precision of the generated numbers
-    info.minimum = 0;
-    info.maximum = 100;
-    info.precision = 2;
+    int numbersToGenerate, numberOnEachRow;
     double generatedNumber;
 
     outputFile.open("generatedNumbers.txt");
     srand(time(0));
 
-    for (int i = 1; i <= NUMBERS_TO_GENERATE; i++)
+    getNumbersInfo(info, numbersToGenerate, numberOnEachRow);
+    for (int i = 1; i <= numbersToGenerate; i++)
     {
         generatedNumber = getRandomNumber(info);
         outputFile << generatedNumber << " ";
-        if ((i % NUMBERS_ON_ROW) == 0)
+        if ((i % numberOnEachRow) == 0)
             outputFile << std::endl;
     }
 }
@@ -49,4 +46,46 @@ double getRandomNumber(NumberGenerateInfo info)
 
     return (double)((rand() % (range * precisionMultipier)) + info.minimum)
         / precisionMultipier;
+}
+
+// gets the information fromt he user about the number they want to generate
+void getNumbersInfo(NumberGenerateInfo& info, int& numbersToGenerate,
+    int& numberOnEachRow)
+{
+    numbersToGenerate = 
+        getInput("Amount of numbers you want to generate: ", false);
+    numberOnEachRow = 
+        getInput("Numbers you want to have on each row: ", false);
+    info.minimum = getInput("Minimum number: ", true);
+    info.maximum = getInput("Maximum number: ", true);
+    info.precision = 
+        getInput("Number of decimal place precision for your number: ", false);
+    
+}
+
+// function to check user input
+int getInput(std::string prompt, bool canBeNegative)
+{
+    int userInput;
+    std::string userStringInput;
+
+    do
+    {
+        std::cout << prompt;
+        std::cin >> userStringInput;
+
+    } while(([userStringInput, canBeNegative, &userInput](){
+        int i = 0;
+        while (userStringInput[i])
+            if (!std::isdigit(userStringInput[i++]))
+            {
+                std::cout << "The input has to be an integer" << std::endl;
+                return true;
+            }
+        userInput = std::stoi(userStringInput);
+        if (!canBeNegative && (userInput < 0)) return true;
+        return false;
+        })());
+
+    return userInput;
 }
