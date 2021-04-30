@@ -1,8 +1,8 @@
 # Random Precise Number Generator
  Generates a random number within a range that contains decimal values.
 
-## Future updates
- - I'll make it so you can just download the .exe file in folder x64 and just run that next to a config file where you can specify all the bounds of the number you want to generate
-
-### For now 
-- you'll have to make a seperate visual studio project and copy and paste everything inside the .cpp file and run your code that way :)
+## How to use
+ - Go to this link [Random Number Generator With Decimals.exe](https://github.com/araiyan/Random-Precise-Number-Generator/blob/main/x64/Release/Random%20Number%20Generator%20With%20Decimals.exe)
+ - Download the .exe file and run the file
+ - Input the information about the random numbers you want to create
+ - After the program finishes running, it will create a file "generatedNumbers.txt" where you can find your randomly generated numbers
