@@ -5,6 +5,8 @@
 #include <cmath>
 #include <string>
 #include <thread>
+#include <future>
+#include <chrono>
 #include <windows.h>
 #include <iomanip>
 
@@ -19,7 +21,7 @@ void getNumbersInfo(NumberGenerateInfo& info, int& numbersToGenerate,
     int& numberOnEachRow);
 int getInput(std::string prompt, bool canBeNegative);
 double getRandomNumber(NumberGenerateInfo info);
-void displayLoadingScreen(std::thread& th);
+void displayLoadingScreen(std::future<bool>& future);
 
 int main()
 {
@@ -57,9 +59,11 @@ int main()
     srand(time(0));
 
     getNumbersInfo(info, numbersToGenerate, numbersOnEachRow);
-    
-    std::thread th([info, numbersToGenerate, numbersOnEachRow, &outputFile]()
+    std::promise<bool> promise;
+    std::future<bool> future = promise.get_future();
+    std::thread th([&promise, info, numbersToGenerate, numbersOnEachRow, &outputFile]()
         {
+            outputFile << std::setprecision(8);
             double generatedNumber;
             for (int i = 1; i <= numbersToGenerate; i++)
             {
@@ -68,9 +72,11 @@ int main()
                 if ((i % numbersOnEachRow) == 0)
                     outputFile << std::endl;
             }
+            promise.set_value(true);
         });
 
-    displayLoadingScreen(th);
+    displayLoadingScreen(future);
+    th.join();
 }
 
 // gets a random number based on the info of that number
@@ -89,8 +95,15 @@ void getNumbersInfo(NumberGenerateInfo& info, int& numbersToGenerate,
 {
     numbersToGenerate = 
         getInput("Amount of numbers you want to generate: ", false);
-    numberOnEachRow = 
-        getInput("Numbers you want to have on each row: ", false);
+    do
+    {
+        numberOnEachRow =
+            getInput("Numbers you want to have on each row: ", false);
+        if (numberOnEachRow <= 0)
+            std::cout << "The numbers on each row must be a positive integer"
+                << std::endl;
+    } while (numberOnEachRow <= 0);
+    
     do {
         info.minimum = getInput("Minimum number: ", true);
         info.maximum = getInput("Maximum number: ", true);
@@ -144,18 +157,30 @@ int getInput(std::string prompt, bool canBeNegative)
 }
 
 // a function that displays a loading screen depending if a thread is joinable
-void displayLoadingScreen(std::thread& th)
+void displayLoadingScreen(std::future<bool>& future)
 {
-    std::cout << th.joinable() << true <<  std::endl;
-    while (!th.joinable())
+    using namespace std::chrono_literals;
+
+    auto status = future.wait_for(0ms);
+
+    while (!(status == std::future_status::ready))
     {
         std::cout << "Loading";
-        for (int i = 0; (i < 3) && th.joinable(); i++)
+        status = future.wait_for(0ms);
+        for (int i = 0; (i < 3) && !(status == std::future_status::ready); i++)
         {
             Sleep(200);
             std::cout << ".";
+            status = future.wait_for(0ms);
+                
         }
-        system("clear");
+        system("CLS");
     }
-    th.join();
+
+    std::cout << "Numbers generated!" << std::endl
+        << "You can find the generated numbers on the file"
+        << "\"generatedNumbers.txt\"";
+    std::cout << std::endl;
+
+    system("pause");
 }
